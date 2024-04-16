@@ -10,6 +10,7 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+from datetime import datetime
 
 
 class HBNBCommand(cmd.Cmd):
@@ -113,18 +114,54 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
-        """ Create an object of any class"""
-        if not args:
+    def do_create(self, arg):
+        """Create a new instance of a class."""
+        if not arg:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+
+        args = arg.split()
+        class_name = args[0]
+        params = ' '.join(args[1:])
+
+        if class_name not in self.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
-        storage.save()
-        print(new_instance.id)
-        storage.save()
+
+        if not params:
+            print("** no parameters given **")
+            return
+
+        """ Parse parameters """
+        parsed_params = {}
+        for param in params.split(','):
+            key, value = param.split('=')
+            key = key.strip()
+            value = value.strip()
+
+            """ Handle string value """
+            if value.startswith('"') and value.endswith('"'):
+                value = value[1:-1].replace('_', ' ').replace('\\"', '"')
+            elif '.' in value:
+                try:
+                    value = float(value)
+                except ValueError:
+                    print(f"** invalid value for {key} **")
+                    continue
+            else:
+                try:
+                    value = int(value)
+                except ValueError:
+                    print(f"** invalid value for {key} **")
+                    continue
+
+            parsed_params[key] = value
+
+        if 'updated_at' not in parsed_params:
+            parsed_params['updated_at'] = datetime.now()
+
+        """ Create instance and add to storage """
+        obj = self.classes[class_name](**parsed_params)
 
     def help_create(self):
         """ Help information for the create method """
