@@ -18,12 +18,13 @@ class FileStorage:
     __objects = {}
 
     def all(self, cls=None):
-        """ Returns the dictionary __objects
+        """
+        Returns the list of objects of one type of class.
         """
         if cls is None:
-            return FileStorage.__objects
-        else:
-            return {k: v for k, v in FileStorage.__objects.items() if isinstance(v, cls)}
+            return self.__objects
+
+        return {k: v for k, v in self.__objects.items() if isinstance(v, cls)}
 
     def new(self, obj):
         """ Sets in __objects the obj with key <obj class name>.id
@@ -52,10 +53,11 @@ class FileStorage:
                     FileStorage.__objects[key] = obj
 
     def delete(self, obj=None):
-        """ Deletes obj from __objects if it's inside
         """
-        if obj is None:
-            return
-        key = "{}.{}".format(obj.__class__.__name__, obj.id)
-        if key in FileStorage.__objects:
-            del FileStorage.__objects[key]
+        Deletes obj from __objects if it's inside.
+        If obj is equal to None, the method should not do anything.
+        """
+        if obj is not None:
+            key = "{}.{}".format(type(obj).__name__, obj.id)
+            if key in self.__objects:
+                del self.__objects[key]

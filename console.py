@@ -116,62 +116,26 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, arg):
-        """Create a new instance of a class."""
-        if not arg:
+    def do_create(self, args):
+        """ Create an object of any class"""
+        try:
+            if not args:
+                raise SyntaxError()
+            arg_list = args.split(" ")
+            kw = {}
+            for arg in arg_list[1:]:
+                arg_splited = arg.split("=")
+                arg_value = eval(arg_splited[1])
+                if isinstance(arg_value, str):
+                    arg_value = arg_value.replace("_", " ").replace('"', '\\"')
+                kw[arg_splited[0]] = arg_value
+        except SyntaxError:
             print("** class name missing **")
-            return
-
-        args = arg.split()
-        class_name = args[0]
-        params = ' '.join(args[1:])
-
-        if class_name not in self.classes:
+        except NameError:
             print("** class doesn't exist **")
-            return
-
-        if not params:
-            print("** no parameters given **")
-            return
-
-        """ Parse parameters """
-        parsed_params = {}
-        for param in params.split(','):
-            key, value = param.split('=')
-            key = key.strip()
-            value = value.strip()
-
-            """ Handle string value """
-            if value.startswith('"') and value.endswith('"'):
-                value = value[1:-1].replace('_', ' ').replace('\\"', '"')
-            elif '.' in value:
-                try:
-                    value = float(value)
-                except ValueError:
-                    print(f"** invalid value for {key} **")
-                    continue
-            else:
-                try:
-                    value = int(value)
-                except ValueError:
-                    print(f"** invalid value for {key} **")
-                    continue
-
-            parsed_params[key] = value
-
-        if 'updated_at' not in parsed_params:
-            parsed_params['updated_at'] = datetime.now()
-
-        """ Ensure 'created_at' and 'id' keys are included """
-        if 'created_at' not in parsed_params:
-            parsed_params['created_at'] = str(datetime.now())  # Convert to string
-        if 'id' not in parsed_params:
-            parsed_params['id'] = str(uuid4())
-
-        """ Create instance and add to storage """
-        obj = self.classes[class_name](**parsed_params)
-        obj.save()
-        print(obj.id)
+        new_instance = HBNBCommand.classes[arg_list[0]](**kw)
+        new_instance.save()
+        print(new_instance.id)
 
     def help_create(self):
         """ Help information for the create method """
