@@ -11,6 +11,8 @@ from models.city import City
 from models.amenity import Amenity
 from models.review import Review
 from datetime import datetime
+import re
+from uuid import uuid4
 
 
 class HBNBCommand(cmd.Cmd):
@@ -160,8 +162,16 @@ class HBNBCommand(cmd.Cmd):
         if 'updated_at' not in parsed_params:
             parsed_params['updated_at'] = datetime.now()
 
+        """ Ensure 'created_at' and 'id' keys are included """
+        if 'created_at' not in parsed_params:
+            parsed_params['created_at'] = str(datetime.now())  # Convert to string
+        if 'id' not in parsed_params:
+            parsed_params['id'] = str(uuid4())
+
         """ Create instance and add to storage """
         obj = self.classes[class_name](**parsed_params)
+        obj.save()
+        print(obj.id)
 
     def help_create(self):
         """ Help information for the create method """
