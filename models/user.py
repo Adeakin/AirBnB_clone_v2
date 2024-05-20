@@ -1,25 +1,29 @@
 #!/usr/bin/python3
-"""Define the User class."""
-from sqlalchemy import Column, String
+""" holds class User"""
+import models
 from models.base_model import BaseModel, Base
+from os import getenv
+import sqlalchemy
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
 
 class User(BaseModel, Base):
-    """User class representing users.
+    """Representation of a user """
+    if models.storage_t == 'db':
+        __tablename__ = 'users'
+        email = Column(String(128), nullable=False)
+        password = Column(String(128), nullable=False)
+        first_name = Column(String(128), nullable=True)
+        last_name = Column(String(128), nullable=True)
+        places = relationship("Place", backref="user")
+        reviews = relationship("Review", backref="user")
+    else:
+        email = ""
+        password = ""
+        first_name = ""
+        last_name = ""
 
-    Attributes:
-        email (str): The email address of the user.
-        password (str): The password for user login.
-        first_name (str): The first name of the user.
-        last_name (str): The last name of the user.
-        places (relationship): Relationship with the Place class.
-        reviews (relationship): Relationship with the Review class.
-    """
-    __tablename__ = "users"
-    email = Column(String(128), nullable=False)
-    password = Column(String(128), nullable=False)
-    first_name = Column(String(128))
-    last_name = Column(String(128))
-    places = relationship("Place", cascade='all, delete, delete-orphan', backref="user")
-    reviews = relationship("Review", cascade='all, delete, delete-orphan', backref="user")
+    def __init__(self, *args, **kwargs):
+        """initializes user"""
+        super().__init__(*args, **kwargs)
